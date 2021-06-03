@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer-service-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: consumer-service-pod
+  template:
+    metadata:
+      labels:
+        app: consumer-service-pod
+    spec:
+      containers:
+        - image: gcr.io/pnr-order-poc/consumer-service:latest
+          name: consumer-service
+            

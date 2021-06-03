@@ -1,0 +1,56 @@
+server.port: 8090
+
+spring:
+  profiles.active: dev
+  cloud:
+    gcp:
+      project-id: sab-ors-poc-sbx-01-9096
+      #credentials.location: file:C:\\Users\\SG0310427\\Downloads\\sab-ors-poc-sbx-01-9096-f8581ce293f7.json
+      spanner:
+        instance-id: instance-1
+        database: database-1
+
+
+
+## logging
+logging:
+  pattern.console: '%d{yyyy-MM-dd HH:mm:ss} [%X{source}] [%X{correlation-id}] [%-5level] [%C:%L] - %m%n'
+  level.org.springframework: info
+  file:
+    name: logs/consumer-service/app.log
+
+# actuator properties
+management:
+  endpoints.web.exposure.include: '*'
+  endpoint.health.show-details: always
+  info.git.mode: full
+
+info:
+  app:
+    name: consumer-service
+    description: consume message from subscription and store in database
+    version: 1.0.0
+    java-vendor: ${java.specification.vendor}
+
+app:
+  subscription:
+    id: subs-demo-1
+
+---
+spring.profiles: dev
+
+---
+spring.profiles: test
+
+---
+spring.profiles: prod
+
+---
+spring.profiles: emulator
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 20
