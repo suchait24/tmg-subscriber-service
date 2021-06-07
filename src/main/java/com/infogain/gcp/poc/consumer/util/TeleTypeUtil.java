@@ -7,8 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.UUID;
 
 @Slf4j
@@ -24,6 +26,20 @@ public class TeleTypeUtil {
         log.info("Teletype dto generated : {}", teletypeEventDTO);
 
         return teletypeEventDTO;
+    }
+
+    public static String marshall(TeletypeEventDTO teletypeEventDTO) throws JAXBException {
+
+        JAXBContext jaxbContext = JAXBContext.newInstance(TeletypeEventDTO.class);
+        Marshaller marshaller = jaxbContext.createMarshaller();
+
+        StringWriter stringWriter = new StringWriter();
+        marshaller.marshal(teletypeEventDTO, stringWriter);
+
+        String result = stringWriter.toString();
+        log.info("Teletype XML generated : {}", result);
+
+        return result;
     }
 
     public static TeleTypeEntity convert(TeletypeEventDTO teletypeEventDTO, String message, Integer sequenceNumber) {

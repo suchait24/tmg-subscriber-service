@@ -1,3 +1,4 @@
+/*
 package com.infogain.gcp.poc.consumer.component;
 
 import com.google.api.core.ApiService.Listener;
@@ -74,6 +75,7 @@ public class MessageSubscriber {
     private Subscriber getSubscriber(ProjectSubscriptionName subscriptionName, MessageReceiver receiver, ExecutorProvider executorProvider) {
         return Subscriber.newBuilder(subscriptionName, receiver)
                 .setExecutorProvider(executorProvider)
+                .setParallelPullCount(100)
                 .build();
     }
 
@@ -88,3 +90,4 @@ public class MessageSubscriber {
         };
     }
 }
+*/

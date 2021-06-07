@@ -1,3 +1,4 @@
+/*
 package com.infogain.gcp.poc.consumer.component;
 
 import lombok.RequiredArgsConstructor;
@@ -21,3 +22,4 @@ public class StartListener {
     }
 
 }
+*/
