@@ -63,14 +63,7 @@ public class SubscriptionProcessingService {
         log.info("Started processing subscription messages list , total records found : {}", teletypeEventDTOList.size());
 
         List<TeleTypeEntity> teleTypeEntityList = teletypeEventDTOList.stream()
-                .map(record -> {
-                    try {
-                        return TeleTypeUtil.convert(record, TeleTypeUtil.marshall(record), DEFAULT_SEQUENCE_NUMBER++, batchRecord.getBatchMessageId());
-                    } catch (JAXBException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                })
+                .map(record -> wrapTeletypeConversionException(record, DEFAULT_SEQUENCE_NUMBER++, batchRecord.getBatchMessageId()))
                 .collect(Collectors.toList());
 
         teletypeMessageStore.saveMessagesList(teleTypeEntityList);
@@ -88,6 +81,16 @@ public class SubscriptionProcessingService {
         log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), Duration.between(start, end).toMillis());
 
         return teleTypeEntityList;
+    }
+
+    private TeleTypeEntity wrapTeletypeConversionException(TeletypeEventDTO teletypeEventDTO, Integer sequenceNumber, Integer batchId) {
+
+        try {
+            return TeleTypeUtil.convert(teletypeEventDTO, TeleTypeUtil.marshall(teletypeEventDTO), sequenceNumber, batchId);
+        } catch (JAXBException e) {
+            log.error("error occurred while converting : {}", e.getMessage());
+        }
+        return null;
     }
 
 }
