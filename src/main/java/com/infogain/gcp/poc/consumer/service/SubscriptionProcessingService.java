@@ -55,7 +55,7 @@ public class SubscriptionProcessingService {
         Instant end = Instant.now();
 
        log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
-       log.info("total time taken to process {} is {} ms", teletypeEventDTOList.size(), Duration.between(start, end));
+       log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), Duration.between(start, end).toMillis());
 
        log.info("Logging batch to database now.");
 
