@@ -6,8 +6,8 @@ LABEL maintainer="suchait.gaurav.ctr@sabre.com"
 # add volume pointing to /tmp
 VOLUME /tmp
 
-# Make port 9000 available to the world outside the container
-EXPOSE 9000
+# Make port 8090 available to the world outside the container
+EXPOSE 8090
 
 # application jar file when packaged
 ARG jar_file=target/consumer-service.jar
