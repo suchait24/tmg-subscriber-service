@@ -3,6 +3,7 @@ package com.infogain.gcp.poc.consumer.service;
 import com.google.cloud.Timestamp;
 import com.infogain.gcp.poc.consumer.component.BatchStore;
 import com.infogain.gcp.poc.consumer.component.TeletypeMessageStore;
+import com.infogain.gcp.poc.consumer.component.TeletypePublisher;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
 import com.infogain.gcp.poc.consumer.entity.BatchEventEntity;
@@ -16,9 +17,11 @@ import org.springframework.cloud.gcp.pubsub.support.converter.ConvertedAcknowled
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,21 +34,24 @@ public class SubscriptionProcessingService {
     private final TeletypeMessageStore teletypeMessageStore;
     private final BatchStore batchStore;
 
-    public void processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, Timestamp batchReceivedTime) {
+    private final TeletypePublisher teletypePublisher;
+
+    public void processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, Timestamp batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
         if (!msgs.isEmpty()) {
             List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> msg.getPayload()).collect(Collectors.toList());
             BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
-            processSubscriptionMessagesList(batchRecord);
+            List<TeleTypeEntity> teleTypeEntityList = processSubscriptionMessagesList(batchRecord);
 
-            msgs.forEach(msg -> {
-                //log.info("message received : {}", msg.getPayload().toString());
-                msg.ack();
-            });
+            //send acknowledge for all processed messages
+            msgs.forEach(msg -> msg.ack());
+
+            //send all processed messages to another topic.
+            teletypePublisher.processPublish(teleTypeEntityList);
         }
     }
 
-    private void processSubscriptionMessagesList(BatchRecord batchRecord) {
+    private List<TeleTypeEntity> processSubscriptionMessagesList(BatchRecord batchRecord) {
 
         Instant start = Instant.now();
 
@@ -81,6 +87,7 @@ public class SubscriptionProcessingService {
         Instant end = Instant.now();
         log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), Duration.between(start, end).toMillis());
 
+        return teleTypeEntityList;
     }
 
 }

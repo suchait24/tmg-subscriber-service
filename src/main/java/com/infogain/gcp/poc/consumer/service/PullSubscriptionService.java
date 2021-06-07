@@ -2,9 +2,7 @@ package com.infogain.gcp.poc.consumer.service;
 
 import com.google.cloud.Timestamp;
 import com.google.pubsub.v1.ProjectSubscriptionName;
-import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
-import com.infogain.gcp.poc.consumer.util.BatchRecordUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,10 +10,10 @@ import org.springframework.cloud.gcp.pubsub.core.subscriber.PubSubSubscriberTemp
 import org.springframework.cloud.gcp.pubsub.support.converter.ConvertedAcknowledgeablePubsubMessage;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -29,7 +27,7 @@ public class PullSubscriptionService {
 
     private final SubscriptionProcessingService subscriptionProcessingService;
 
-    public void pullMessage(PubSubSubscriberTemplate subscriberTemplate) {
+    public void pullMessage(PubSubSubscriberTemplate subscriberTemplate) throws InterruptedException, ExecutionException, JAXBException, IOException {
 
         List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs = subscriberTemplate
                 .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 100, true, TeletypeEventDTO.class);

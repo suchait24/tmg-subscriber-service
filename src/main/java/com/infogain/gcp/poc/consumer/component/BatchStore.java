@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class BatchStore {
 
     private final BatchEventRepository batchEventRepository;
+
     public void saveBatchEventEntity(BatchEventEntity batchEventEntity) {
         log.info("Saving batch event entity to database");
         batchEventRepository.save(batchEventEntity);

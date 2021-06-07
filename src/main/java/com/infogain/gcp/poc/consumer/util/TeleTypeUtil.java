@@ -44,7 +44,6 @@ public class TeleTypeUtil {
 
     public static TeleTypeEntity convert(TeletypeEventDTO teletypeEventDTO, String message, Integer sequenceNumber, Integer batchId) {
 
-        //TODO: value of sequence number could be anything - decide later.
         return TeleTypeEntity.builder()
                 .tasId(UUID.randomUUID().toString())
                 .hostLocator(teletypeEventDTO.getHostRecordLocator())

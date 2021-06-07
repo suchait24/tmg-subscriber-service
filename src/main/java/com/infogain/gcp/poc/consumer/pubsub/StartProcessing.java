@@ -7,6 +7,9 @@ import org.springframework.cloud.gcp.pubsub.core.subscriber.PubSubSubscriberTemp
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Component
@@ -23,7 +26,17 @@ public class StartProcessing {
         //We can use a thread pool as well rather than using single thread.
        Thread subscriberThread = new Thread(() -> {
             while(true) {
-                pullDemo.pullMessage(subSubscriberTemplate);
+                try {
+                    pullDemo.pullMessage(subSubscriberTemplate);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (JAXBException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
        });
 

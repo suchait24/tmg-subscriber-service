@@ -40,6 +40,8 @@ info:
 app:
   subscription:
     id: subs-demo-1
+  topic:
+    name: projects/sab-ors-poc-sbx-01-9096/topics/teletype-topic
 
 ---
 spring.profiles: dev
