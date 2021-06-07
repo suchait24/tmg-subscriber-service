@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,6 +29,8 @@ public class SubscriptionProcessingService {
     private static final String SUBSCRIBER_ID = "S1";
 
     public void processSubscriptionMessagesList(BatchRecord batchRecord) {
+
+        Instant start = Instant.now();
 
         List<TeletypeEventDTO> teletypeEventDTOList = null;
 
@@ -48,7 +52,11 @@ public class SubscriptionProcessingService {
 
        saveMessagesList(teleTypeEntityList);
 
+        Instant end = Instant.now();
+
        log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
+       log.info("total time taken to process {} is {} ms", teletypeEventDTOList.size(), Duration.between(start, end));
+
        log.info("Logging batch to database now.");
 
        BatchEventEntity batchEventEntity = createBatchEventEntity(teleTypeEntityList, batchRecord);
