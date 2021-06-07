@@ -40,4 +40,7 @@ public class TeleTypeEntity {
 
     @Column(name = "PAYLOAD")
     private String payload;
+
+    @Column(name = "BATCH_ID")
+    private Integer batchId;
 }

@@ -1,21 +1,24 @@
 package com.infogain.gcp.poc.consumer.service;
 
+import com.google.cloud.Timestamp;
+import com.infogain.gcp.poc.consumer.component.BatchStore;
+import com.infogain.gcp.poc.consumer.component.TeletypeMessageStore;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
 import com.infogain.gcp.poc.consumer.entity.BatchEventEntity;
 import com.infogain.gcp.poc.consumer.entity.TeleTypeEntity;
-import com.infogain.gcp.poc.consumer.repository.BatchEventRepository;
-import com.infogain.gcp.poc.consumer.repository.TASRepository;
+import com.infogain.gcp.poc.consumer.util.BatchEventEntityUtil;
+import com.infogain.gcp.poc.consumer.util.BatchRecordUtil;
 import com.infogain.gcp.poc.consumer.util.TeleTypeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.gcp.pubsub.support.converter.ConvertedAcknowledgeablePubsubMessage;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,70 +26,61 @@ import java.util.stream.Collectors;
 @Service
 public class SubscriptionProcessingService {
 
-    private static Integer DEFAULT_SEQUENCE_NUMBER = 1;
-    private final TASRepository tasRepository;
-    private final BatchEventRepository batchEventRepository;
     private static final String SUBSCRIBER_ID = "S1";
+    private static Integer DEFAULT_SEQUENCE_NUMBER = 1;
+    private final TeletypeMessageStore teletypeMessageStore;
+    private final BatchStore batchStore;
 
-    public void processSubscriptionMessagesList(BatchRecord batchRecord) {
+    public void processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, Timestamp batchReceivedTime) {
+
+        if (!msgs.isEmpty()) {
+            List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> msg.getPayload()).collect(Collectors.toList());
+            BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
+            processSubscriptionMessagesList(batchRecord);
+
+            msgs.forEach(msg -> {
+                //log.info("message received : {}", msg.getPayload().toString());
+                msg.ack();
+            });
+        }
+    }
+
+    private void processSubscriptionMessagesList(BatchRecord batchRecord) {
 
         Instant start = Instant.now();
 
         List<TeletypeEventDTO> teletypeEventDTOList = null;
 
-        if(!batchRecord.getDtoList().isEmpty())
+        if (!batchRecord.getDtoList().isEmpty())
             teletypeEventDTOList = batchRecord.getDtoList();
 
         log.info("Started processing subscription messages list , total records found : {}", teletypeEventDTOList.size());
 
-       List<TeleTypeEntity> teleTypeEntityList = teletypeEventDTOList.stream()
-               .map(record -> {
-                   try {
-                       return TeleTypeUtil.convert(record, TeleTypeUtil.marshall(record), DEFAULT_SEQUENCE_NUMBER++);
-                   } catch (JAXBException e) {
-                       e.printStackTrace();
-                   }
-                   return null;
-               })
-               .collect(Collectors.toList());
+        List<TeleTypeEntity> teleTypeEntityList = teletypeEventDTOList.stream()
+                .map(record -> {
+                    try {
+                        return TeleTypeUtil.convert(record, TeleTypeUtil.marshall(record), DEFAULT_SEQUENCE_NUMBER++, batchRecord.getBatchMessageId());
+                    } catch (JAXBException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                })
+                .collect(Collectors.toList());
 
-       saveMessagesList(teleTypeEntityList);
+        teletypeMessageStore.saveMessagesList(teleTypeEntityList);
+
+        log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
+
+
+        log.info("Logging batch to database now.");
+        BatchEventEntity batchEventEntity = BatchEventEntityUtil.createBatchEventEntity(teleTypeEntityList, batchRecord, SUBSCRIBER_ID);
+        log.info("Batch entity generated : {}", batchEventEntity);
+
+        batchStore.saveBatchEventEntity(batchEventEntity);
 
         Instant end = Instant.now();
-
-       log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
-       log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), Duration.between(start, end).toMillis());
-
-       log.info("Logging batch to database now.");
-
-       BatchEventEntity batchEventEntity = createBatchEventEntity(teleTypeEntityList, batchRecord);
-       log.info("Batch entity generated : {}", batchEventEntity);
-
-        saveBatchEventEntity(batchEventEntity);
+        log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), Duration.between(start, end).toMillis());
 
     }
 
-    private void saveMessagesList(List<TeleTypeEntity> teleTypeEntityList) {
-        log.info("Saving all messages");
-        tasRepository.saveAll(teleTypeEntityList);
-        log.info("All messages saved in database.");
-
-    }
-
-    private BatchEventEntity createBatchEventEntity(List<TeleTypeEntity> teleTypeEntityList, BatchRecord batchRecord) {
-
-        return BatchEventEntity.builder()
-                .batchEventLogId(UUID.randomUUID().toString())
-                .batchMessageId(batchRecord.getBatchMessageId())
-                .subscriberId(SUBSCRIBER_ID)
-                .totalMessageBatchCount(teleTypeEntityList.size())
-                .batchReceivedTime(batchRecord.getBatchReceivedTime())
-                .build();
-    }
-
-    private void saveBatchEventEntity(BatchEventEntity batchEventEntity) {
-        log.info("Saving batch event entity to database");
-        batchEventRepository.save(batchEventEntity);
-        log.info("batch event entity successfully saved.");
-    }
 }

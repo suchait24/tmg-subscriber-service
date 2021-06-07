@@ -20,8 +20,7 @@ public class StartProcessing {
     void runPullAlways() {
         log.info("Start pull mechanism in background.");
 
-        //We can use a threadpool as well rather than using single thread.
-
+        //We can use a thread pool as well rather than using single thread.
        Thread subscriberThread = new Thread(() -> {
             while(true) {
                 pullDemo.pullMessage(subSubscriberTemplate);

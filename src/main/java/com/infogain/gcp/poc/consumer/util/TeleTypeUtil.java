@@ -42,7 +42,7 @@ public class TeleTypeUtil {
         return result;
     }
 
-    public static TeleTypeEntity convert(TeletypeEventDTO teletypeEventDTO, String message, Integer sequenceNumber) {
+    public static TeleTypeEntity convert(TeletypeEventDTO teletypeEventDTO, String message, Integer sequenceNumber, Integer batchId) {
 
         //TODO: value of sequence number could be anything - decide later.
         return TeleTypeEntity.builder()
@@ -52,6 +52,7 @@ public class TeleTypeUtil {
                 .messageCorrelationId(String.valueOf(teletypeEventDTO.getMessageCorelationId()))
                 .sequenceNumber(Long.valueOf(sequenceNumber))
                 .createdTimestamp(Timestamp.now())
+                .batchId(batchId)
                 .payload(message)
                 .build();
     }

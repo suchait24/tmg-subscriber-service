@@ -4,6 +4,7 @@ import com.google.cloud.Timestamp;
 import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
+import com.infogain.gcp.poc.consumer.util.BatchRecordUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +28,6 @@ public class PullSubscriptionService {
     private String subscriptionId;
 
     private final SubscriptionProcessingService subscriptionProcessingService;
-    private static Integer BATCH_MESSAGE_ID = 1;
-
 
     public void pullMessage(PubSubSubscriberTemplate subscriberTemplate) {
 
@@ -37,6 +36,10 @@ public class PullSubscriptionService {
 
         Timestamp batchReceivedTime = Timestamp.now();
 
+        //acknowledge only when batch is successfully processed.
+        subscriptionProcessingService.processMessages(msgs, batchReceivedTime);
+
+        /*
         msgs.forEach(msg -> {
             log.info("message received : {}", msg.getPayload().toString());
             msg.ack();
@@ -44,21 +47,10 @@ public class PullSubscriptionService {
 
         if (!msgs.isEmpty()) {
             List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> msg.getPayload()).collect(Collectors.toList());
-            BatchRecord batchRecord = createBatchRecord(teletypeEventDTOList, batchReceivedTime);
+            BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
             subscriptionProcessingService.processSubscriptionMessagesList(batchRecord);
         }
+         */
     }
 
-    private BatchRecord createBatchRecord(List<TeletypeEventDTO> teletypeEventDTOList, Timestamp batchReceivedTime) {
-
-        Random random = new Random();
-
-        BatchRecord batchRecord = new BatchRecord();
-        batchRecord.setDtoList(teletypeEventDTOList);
-        //batchRecord.setBatchMessageId(random.nextInt(7));
-        batchRecord.setBatchMessageId(BATCH_MESSAGE_ID++);
-        batchRecord.setBatchReceivedTime(batchReceivedTime);
-
-        return batchRecord;
-    }
 }
