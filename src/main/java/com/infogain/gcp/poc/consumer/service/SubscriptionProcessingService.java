@@ -67,13 +67,6 @@ public class SubscriptionProcessingService {
 
         log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
 
-
-        log.info("Logging batch to database now.");
-        BatchEventEntity batchEventEntity = BatchEventEntityUtil.createBatchEventEntity(teleTypeEntityList, batchRecord, SUBSCRIBER_ID);
-        log.info("Batch entity generated : {}", batchEventEntity);
-
-        batchStore.saveBatchEventEntity(batchEventEntity);
-
         Instant end = Instant.now();
         log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), Duration.between(start, end).toMillis());
 
