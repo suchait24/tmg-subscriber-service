@@ -21,6 +21,7 @@ public class TeletypePublisher {
     private final BatchPublisher batchPublisher;
 
     public void processPublish(List<TeleTypeEntity> teleTypeEntityList) throws InterruptedException, ExecutionException, JAXBException, IOException {
+        log.info("Publishing the message to topic.");
 
         List<String> teletypeDataDTOMessagesList = teleTypeEntityList.stream()
                 .map(element -> TeletypeDataDTOUtil.getTeletypeDataDTOMessage(element))

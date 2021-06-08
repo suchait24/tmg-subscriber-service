@@ -31,7 +31,6 @@ public class SubscriptionProcessingService {
 
     private static final String SUBSCRIBER_ID = "S1";
     private static Integer DEFAULT_SEQUENCE_NUMBER = 1;
-    private final TeletypeMessageStore teletypeMessageStore;
     private final BatchStore batchStore;
 
     private final TeletypePublisher teletypePublisher;
@@ -45,13 +44,10 @@ public class SubscriptionProcessingService {
 
             //send acknowledge for all processed messages
             msgs.forEach(msg -> msg.ack());
-
-            //send all processed messages to another topic.
-            teletypePublisher.processPublish(teleTypeEntityList);
         }
     }
 
-    private List<TeleTypeEntity> processSubscriptionMessagesList(BatchRecord batchRecord) {
+    private List<TeleTypeEntity> processSubscriptionMessagesList(BatchRecord batchRecord) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
         Instant start = Instant.now();
 
@@ -66,7 +62,8 @@ public class SubscriptionProcessingService {
                 .map(record -> wrapTeletypeConversionException(record, DEFAULT_SEQUENCE_NUMBER++, batchRecord.getBatchMessageId()))
                 .collect(Collectors.toList());
 
-        teletypeMessageStore.saveMessagesList(teleTypeEntityList);
+        //send all processed messages to another topic.
+        teletypePublisher.processPublish(teleTypeEntityList);
 
         log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
 
