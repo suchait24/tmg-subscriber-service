@@ -13,6 +13,6 @@ spec:
         app: consumer-service-pod
     spec:
       containers:
-        - image: gcr.io/pnr-order-poc/consumer-service:latest
+        - image: gcr.io/sab-ors-poc-sbx-01-9096/consumer-service:latest
           name: consumer-service
             
