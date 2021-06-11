@@ -2,7 +2,6 @@ package com.infogain.gcp.poc.consumer.service;
 
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
-import com.infogain.gcp.poc.consumer.component.BatchStore;
 import com.infogain.gcp.poc.consumer.component.TeletypePublisher;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
@@ -30,8 +29,9 @@ import java.util.stream.Collectors;
 @Service
 public class SubscriptionProcessingService {
 
-    private static final String SUBSCRIBER_ID = "S1";
-    private final BatchStore batchStore;
+    private static final String BATCH_ID = "batch_id";
+    private static final String SEQUENCE_NUMBER = "sequence_number";
+    private static final String CREATED_TIME = "created_time";
 
     private final TeletypePublisher teletypePublisher;
 
@@ -89,9 +89,9 @@ public class SubscriptionProcessingService {
     private Map<String, String> getAttributesMap(String sequenceNumber, String batchId) {
 
         Map<String, String> attributesMap = new HashMap<>();
-        attributesMap.put("batch_id", String.valueOf(batchId));
-        attributesMap.put("sequence_number", String.valueOf(sequenceNumber));
-        attributesMap.put("created_time",String.valueOf(LocalDateTime.now()));
+        attributesMap.put(BATCH_ID, String.valueOf(batchId));
+        attributesMap.put(SEQUENCE_NUMBER, String.valueOf(sequenceNumber));
+        attributesMap.put(CREATED_TIME,String.valueOf(LocalDateTime.now()));
 
         return attributesMap;
     }
