@@ -27,7 +27,7 @@ public class BatchPublisher {
     @Value("${app.topic.name}")
     private String topicName;
 
-    public void publishMessage(List<String> messageList) throws InterruptedException, IOException, JAXBException, ExecutionException {
+    public void publishMessage(List<PubsubMessage> messageList) throws InterruptedException, IOException, JAXBException, ExecutionException {
 
         Publisher publisher = null;
         List<ApiFuture<String>> messageIdFutures = new ArrayList<>();
@@ -51,10 +51,10 @@ public class BatchPublisher {
             Publisher finalPublisher = publisher;
 
             messageList.forEach(message -> {
-                ByteString data = ByteString.copyFromUtf8(message);
-                PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
+                //ByteString data = ByteString.copyFromUtf8(message);
+                //PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
 
-                ApiFuture<String> messageIdFuture = finalPublisher.publish(pubsubMessage);
+                ApiFuture<String> messageIdFuture = finalPublisher.publish(message);
                 messageIdFutures.add(messageIdFuture);
             });
         } finally {
