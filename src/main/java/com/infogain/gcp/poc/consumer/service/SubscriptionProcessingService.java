@@ -2,15 +2,14 @@ package com.infogain.gcp.poc.consumer.service;
 
 import com.google.cloud.Timestamp;
 import com.infogain.gcp.poc.consumer.component.BatchStore;
-import com.infogain.gcp.poc.consumer.component.TeletypeMessageStore;
 import com.infogain.gcp.poc.consumer.component.TeletypePublisher;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
+import com.infogain.gcp.poc.consumer.dto.TeletypeDataDTO;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
-import com.infogain.gcp.poc.consumer.entity.BatchEventEntity;
 import com.infogain.gcp.poc.consumer.entity.TeleTypeEntity;
-import com.infogain.gcp.poc.consumer.util.BatchEventEntityUtil;
 import com.infogain.gcp.poc.consumer.util.BatchRecordUtil;
 import com.infogain.gcp.poc.consumer.util.TeleTypeUtil;
+import com.infogain.gcp.poc.consumer.util.TeletypeDataDTOUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gcp.pubsub.support.converter.ConvertedAcknowledgeablePubsubMessage;
@@ -22,6 +21,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 public class SubscriptionProcessingService {
 
     private static final String SUBSCRIBER_ID = "S1";
-    private static Integer DEFAULT_SEQUENCE_NUMBER = 1;
     private final BatchStore batchStore;
 
     private final TeletypePublisher teletypePublisher;
@@ -40,14 +39,16 @@ public class SubscriptionProcessingService {
         if (!msgs.isEmpty()) {
             List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> msg.getPayload()).collect(Collectors.toList());
             BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
-            List<TeleTypeEntity> teleTypeEntityList = processSubscriptionMessagesList(batchRecord);
+            processSubscriptionMessagesList(batchRecord);
 
             //send acknowledge for all processed messages
             msgs.forEach(msg -> msg.ack());
         }
     }
 
-    private List<TeleTypeEntity> processSubscriptionMessagesList(BatchRecord batchRecord) throws InterruptedException, ExecutionException, IOException, JAXBException {
+    private void processSubscriptionMessagesList(BatchRecord batchRecord) throws InterruptedException, ExecutionException, IOException, JAXBException {
+
+        AtomicReference<Integer> sequencerNumber = new AtomicReference<>(1);
 
         Instant start = Instant.now();
 
@@ -58,19 +59,18 @@ public class SubscriptionProcessingService {
 
         log.info("Started processing subscription messages list , total records found : {}", teletypeEventDTOList.size());
 
-        List<TeleTypeEntity> teleTypeEntityList = teletypeEventDTOList.stream()
-                .map(record -> wrapTeletypeConversionException(record, DEFAULT_SEQUENCE_NUMBER++, batchRecord.getBatchMessageId()))
+        List<String> teletypeEventDTOMessages = teletypeEventDTOList.stream()
+                .map(record -> TeletypeDataDTOUtil.getTeletypeDataDTOMessage(record, sequencerNumber.getAndSet(sequencerNumber.get() + 1), batchRecord.getBatchMessageId()))
                 .collect(Collectors.toList());
 
         //send all processed messages to another topic.
-        teletypePublisher.processPublish(teleTypeEntityList);
+        teletypePublisher.processPublish(teletypeEventDTOMessages);
 
         log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
 
         Instant end = Instant.now();
         log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), Duration.between(start, end).toMillis());
 
-        return teleTypeEntityList;
     }
 
     private TeleTypeEntity wrapTeletypeConversionException(TeletypeEventDTO teletypeEventDTO, Integer sequenceNumber, Integer batchId) {

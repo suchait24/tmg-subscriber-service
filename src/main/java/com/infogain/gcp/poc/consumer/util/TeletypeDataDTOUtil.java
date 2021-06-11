@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
+import java.time.LocalDateTime;
 
 @Slf4j
 public class TeletypeDataDTOUtil {
@@ -27,18 +28,15 @@ public class TeletypeDataDTOUtil {
         return result;
     }
 
-    public static String getTeletypeDataDTOMessage(TeleTypeEntity teleTypeEntity) {
+    public static String getTeletypeDataDTOMessage(TeletypeEventDTO teletypeEventDTO, Integer sequenceNumber, Integer batchId) {
 
         TeletypeDataDTO teletypeDataDTO = new TeletypeDataDTO();
-        teletypeDataDTO.setBatchId(teleTypeEntity.getBatchId());
-        teletypeDataDTO.setCarrierCode(teleTypeEntity.getCarrierCode());
-        teletypeDataDTO.setHostLocator(teleTypeEntity.getHostLocator());
-        teletypeDataDTO.setMessageCorrelationId(teleTypeEntity.getMessageCorrelationId());
-        teletypeDataDTO.setSequenceNumber(teleTypeEntity.getSequenceNumber());
-        teletypeDataDTO.setTasId(teleTypeEntity.getTasId());
-        teletypeDataDTO.setPayload(teleTypeEntity.getPayload());
-        teletypeDataDTO.setCreatedTimestamp(teleTypeEntity.getCreatedTimestamp().toString());
-        //teletypeDataDTO.setUpdatedTimestamp(teleTypeEntity.getUpdatedTimestamp().toString());
+        teletypeDataDTO.setBatchId(batchId);
+        teletypeDataDTO.setCarrierCode(teletypeEventDTO.getCarrierCode());
+        teletypeDataDTO.setHostLocator(teletypeEventDTO.getHostRecordLocator());
+        teletypeDataDTO.setMessageCorrelationId(String.valueOf(teletypeEventDTO.getMessageCorelationId()));
+        teletypeDataDTO.setSequenceNumber(sequenceNumber);
+        teletypeDataDTO.setCreatedTimestamp(String.valueOf(LocalDateTime.now()));
 
        return teletypeDataDTO.toString();
 
