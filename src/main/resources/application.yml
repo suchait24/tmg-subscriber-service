@@ -39,7 +39,7 @@ info:
 
 app:
   subscription:
-    id: topic-1-subscription-1
+    id: tty-topic-sub
   topic:
     name: projects/sab-ors-poc-sbx-01-9096/topics/teletype-poc-topic
 

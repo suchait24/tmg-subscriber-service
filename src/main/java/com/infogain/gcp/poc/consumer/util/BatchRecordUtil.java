@@ -4,6 +4,7 @@ import com.google.cloud.Timestamp;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 
@@ -11,7 +12,7 @@ public class BatchRecordUtil {
 
     private static Integer BATCH_MESSAGE_ID = 1;
 
-    public static BatchRecord createBatchRecord(List<TeletypeEventDTO> teletypeEventDTOList, Timestamp batchReceivedTime) {
+    public static BatchRecord createBatchRecord(List<TeletypeEventDTO> teletypeEventDTOList, LocalDateTime batchReceivedTime) {
 
         Random random = new Random();
 

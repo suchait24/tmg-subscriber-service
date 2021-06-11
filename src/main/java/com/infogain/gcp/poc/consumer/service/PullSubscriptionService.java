@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -32,7 +33,7 @@ public class PullSubscriptionService {
         List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs = subscriberTemplate
                 .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 100, true, TeletypeEventDTO.class);
 
-        Timestamp batchReceivedTime = Timestamp.now();
+        LocalDateTime batchReceivedTime = LocalDateTime.now();
 
         //acknowledge only when batch is successfully processed.
         subscriptionProcessingService.processMessages(msgs, batchReceivedTime);

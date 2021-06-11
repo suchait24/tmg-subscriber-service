@@ -1,14 +1,11 @@
 package com.infogain.gcp.poc.consumer.service;
 
-import com.google.cloud.Timestamp;
 import com.infogain.gcp.poc.consumer.component.BatchStore;
 import com.infogain.gcp.poc.consumer.component.TeletypePublisher;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeDataDTO;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
-import com.infogain.gcp.poc.consumer.entity.TeleTypeEntity;
 import com.infogain.gcp.poc.consumer.util.BatchRecordUtil;
-import com.infogain.gcp.poc.consumer.util.TeleTypeUtil;
 import com.infogain.gcp.poc.consumer.util.TeletypeDataDTOUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +16,7 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,7 +32,7 @@ public class SubscriptionProcessingService {
 
     private final TeletypePublisher teletypePublisher;
 
-    public void processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, Timestamp batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
+    public void processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, LocalDateTime batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
         if (!msgs.isEmpty()) {
             List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> msg.getPayload()).collect(Collectors.toList());
@@ -61,6 +59,7 @@ public class SubscriptionProcessingService {
 
         List<String> teletypeEventDTOMessages = teletypeEventDTOList.stream()
                 .map(record -> TeletypeDataDTOUtil.getTeletypeDataDTOMessage(record, sequencerNumber.getAndSet(sequencerNumber.get() + 1), batchRecord.getBatchMessageId()))
+                .map(teletypeDataDTO -> wrapTeletypeConversionException(teletypeDataDTO))
                 .collect(Collectors.toList());
 
         //send all processed messages to another topic.
@@ -73,12 +72,12 @@ public class SubscriptionProcessingService {
 
     }
 
-    private TeleTypeEntity wrapTeletypeConversionException(TeletypeEventDTO teletypeEventDTO, Integer sequenceNumber, Integer batchId) {
+    private String wrapTeletypeConversionException(TeletypeDataDTO teletypeDataDTO) {
 
         try {
-            return TeleTypeUtil.convert(teletypeEventDTO, TeleTypeUtil.marshall(teletypeEventDTO), sequenceNumber, batchId);
+            return TeletypeDataDTOUtil.marshall(teletypeDataDTO);
         } catch (JAXBException e) {
-            log.error("error occurred while converting : {}", e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }

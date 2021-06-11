@@ -28,7 +28,7 @@ public class TeletypeDataDTOUtil {
         return result;
     }
 
-    public static String getTeletypeDataDTOMessage(TeletypeEventDTO teletypeEventDTO, Integer sequenceNumber, Integer batchId) {
+    public static TeletypeDataDTO getTeletypeDataDTOMessage(TeletypeEventDTO teletypeEventDTO, Integer sequenceNumber, Integer batchId) {
 
         TeletypeDataDTO teletypeDataDTO = new TeletypeDataDTO();
         teletypeDataDTO.setBatchId(batchId);
@@ -38,7 +38,7 @@ public class TeletypeDataDTOUtil {
         teletypeDataDTO.setSequenceNumber(sequenceNumber);
         teletypeDataDTO.setCreatedTimestamp(String.valueOf(LocalDateTime.now()));
 
-       return teletypeDataDTO.toString();
+       return teletypeDataDTO;
 
     }
 }

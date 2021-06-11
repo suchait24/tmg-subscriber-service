@@ -4,6 +4,7 @@ import com.google.cloud.Timestamp;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -12,5 +13,5 @@ public class BatchRecord {
 
     private List<TeletypeEventDTO> dtoList;
     private Integer batchMessageId;
-    private Timestamp batchReceivedTime;
+    private LocalDateTime batchReceivedTime;
 }

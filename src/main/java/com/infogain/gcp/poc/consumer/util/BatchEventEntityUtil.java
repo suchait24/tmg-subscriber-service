@@ -16,7 +16,7 @@ public class BatchEventEntityUtil {
                 .batchMessageId(batchRecord.getBatchMessageId())
                 .subscriberId(subscriberId)
                 .totalMessageBatchCount(teleTypeEntityList.size())
-                .batchReceivedTime(batchRecord.getBatchReceivedTime())
+                //.batchReceivedTime(batchRecord.getBatchReceivedTime())
                 .build();
     }
 
