@@ -1,6 +1,5 @@
 package com.infogain.gcp.poc.consumer.service;
 
-import com.google.cloud.Timestamp;
 import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
 import lombok.RequiredArgsConstructor;
