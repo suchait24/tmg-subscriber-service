@@ -6,7 +6,7 @@
 	<groupId>com.infogain.gcp.poc</groupId>
 	<artifactId>consumer-service</artifactId>
 	<version>1.0.0.</version>
-	<name>consumer-service</name>
+	<name>tmg-subscriber-service</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
@@ -173,7 +173,7 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>com.infogain.gcp.poc.consumer.ConsumerServiceApplication</mainClass>
+					<mainClass>com.infogain.gcp.poc.consumer.TmgSubscriberServiceApplication</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
