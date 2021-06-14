@@ -2,6 +2,7 @@ package com.infogain.gcp.poc.consumer.service;
 
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
+import com.infogain.gcp.poc.consumer.component.BatchList;
 import com.infogain.gcp.poc.consumer.component.TeletypePublisher;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
@@ -34,6 +35,8 @@ public class SubscriptionProcessingService {
     private static final String CREATED_TIME = "created_time";
 
     private final TeletypePublisher teletypePublisher;
+    BatchList batchList = new BatchList();
+
 
     public void processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, LocalDateTime batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
@@ -70,7 +73,11 @@ public class SubscriptionProcessingService {
         log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
 
         Instant end = Instant.now();
-        log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), Duration.between(start, end).toMillis());
+        Long totalTime = Duration.between(start, end).toMillis();
+        log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), totalTime);
+        batchList.setTime(totalTime);
+        Long batchSumTime = batchList.getAllBatchTimeInMillis().stream().reduce(0L, Long::sum);
+        log.info("total time taken for all batches : {} ", Duration.ofMillis(batchSumTime).toMillis());
 
     }
 
