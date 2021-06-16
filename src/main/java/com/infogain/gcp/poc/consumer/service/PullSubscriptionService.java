@@ -31,7 +31,7 @@ public class PullSubscriptionService {
     public void pullMessage(PubSubSubscriberTemplate subscriberTemplate) throws InterruptedException, ExecutionException, JAXBException, IOException {
 
         List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs = subscriberTemplate
-                .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 100, true, TeletypeEventDTO.class);
+                .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 1000, true, TeletypeEventDTO.class);
 
         LocalDateTime batchReceivedTime = LocalDateTime.now();
 
