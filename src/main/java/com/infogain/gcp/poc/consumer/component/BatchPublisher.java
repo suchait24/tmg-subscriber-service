@@ -34,7 +34,7 @@ public class BatchPublisher {
 
         try {
             long requestBytesThreshold = 5000L; // default : 1 byte
-            long messageCountBatchSize = 100L; // default : 1 message
+            long messageCountBatchSize = 1000L; // default : 1 message
 
             Duration publishDelayThreshold = Duration.ofMillis(100); // default : 1 ms
 
@@ -43,7 +43,7 @@ public class BatchPublisher {
                     BatchingSettings.newBuilder()
                             .setElementCountThreshold(messageCountBatchSize)
                             .setRequestByteThreshold(requestBytesThreshold)
-                            .setDelayThreshold(publishDelayThreshold)
+                            //.setDelayThreshold(publishDelayThreshold)
                             .build();
 
             publisher = Publisher.newBuilder(topicName).setBatchingSettings(batchingSettings).build();
@@ -60,12 +60,13 @@ public class BatchPublisher {
         } finally {
             List<String> messageIds = ApiFutures.allAsList(messageIdFutures).get();
 
-            log.info("Published " + messageIds.size() + " messages with batch settings.");
+            //log.info("Published " + messageIds.size() + " messages with batch settings.");
 
             if (publisher != null) {
                 publisher.shutdown();
-                publisher.awaitTermination(1, TimeUnit.MINUTES);
+                publisher.awaitTermination(10, TimeUnit.SECONDS);
             }
+
         }
     }
 

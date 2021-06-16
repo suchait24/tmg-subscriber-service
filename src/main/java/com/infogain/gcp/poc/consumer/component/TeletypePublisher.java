@@ -19,9 +19,9 @@ public class TeletypePublisher {
     private final BatchPublisher batchPublisher;
 
     public void processPublish(List<PubsubMessage> teletypeDataDTOMessagesList) throws InterruptedException, ExecutionException, JAXBException, IOException {
-        log.info("Publishing the message to topic.");
+        //log.info("Publishing the message to topic.");
 
-        log.info("All messages List : {}", String.valueOf(teletypeDataDTOMessagesList));
+        //log.info("All messages List : {}", String.valueOf(teletypeDataDTOMessagesList));
         batchPublisher.publishMessage(teletypeDataDTOMessagesList);
         log.info("Messages have been successfully published.");
     }

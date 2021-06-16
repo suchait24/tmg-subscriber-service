@@ -61,7 +61,7 @@ public class SubscriptionProcessingService {
         if (!batchRecord.getDtoList().isEmpty())
             teletypeEventDTOList = batchRecord.getDtoList();
 
-        log.info("Started processing subscription messages list , total records found : {}", teletypeEventDTOList.size());
+        //log.info("Started processing subscription messages list , total records found : {}", teletypeEventDTOList.size());
 
         List<PubsubMessage> teletypeEventDTOMessages = teletypeEventDTOList.stream()
                 .map(record -> wrapTeletypeConversionException(record, sequencerNumber.getAndSet(sequencerNumber.get() + 1), batchRecord.getBatchMessageId()))
@@ -70,7 +70,7 @@ public class SubscriptionProcessingService {
         //send all processed messages to another topic.
         teletypePublisher.processPublish(teletypeEventDTOMessages);
 
-        log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
+        //log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
 
         Instant end = Instant.now();
         Long totalTime = Duration.between(start, end).toMillis();
@@ -83,7 +83,7 @@ public class SubscriptionProcessingService {
 
     private PubsubMessage getPubSubMessage(TeletypeEventDTO teletypeEventDTO, Integer sequenceNumber, Integer batchId) throws JAXBException {
 
-        log.info("Preparing pubsub message with attributes.");
+        //log.info("Preparing pubsub message with attributes.");
         Map<String, String> attributesMap = getAttributesMap(String.valueOf(sequenceNumber), String.valueOf(batchId));
 
         return PubsubMessage.newBuilder()
