@@ -37,9 +37,7 @@ public class SubscriptionProcessingService {
     private final TeletypePublisher teletypePublisher;
     BatchList batchList = new BatchList();
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    private ExecutorService executorService1 = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
+    private final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public void processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, LocalDateTime batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
@@ -76,16 +74,16 @@ public class SubscriptionProcessingService {
 
         //send all processed messages to another topic.
 
-        List<CompletableFuture<Void>> future = teletypeEventDTOMessages.stream()
+        List<CompletableFuture<Void>> futureList = teletypeEventDTOMessages.stream()
                 .map(message -> CompletableFuture.runAsync(() -> {
                     try {
                          teletypePublisher.processPublish(message);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error("Error occurred : {}", e.getMessage());
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        log.error("Error occurred : {}", e.getMessage());
                     }
-                },executorService)).collect(Collectors.toList());
+                }, THREAD_POOL)).collect(Collectors.toList());
 
 
         Instant end = Instant.now();
@@ -95,7 +93,7 @@ public class SubscriptionProcessingService {
         Long batchSumTime = batchList.getAllBatchTimeInMillis().stream().reduce(0L, Long::sum);
         //log.info("total time taken for all batches : {} ", Duration.ofMillis(batchSumTime).toMillis());
 
-        return future;
+        return futureList;
     }
 
     private PubsubMessage getPubSubMessage(TeletypeEventDTO teletypeEventDTO, Integer sequenceNumber, Integer batchId) throws JAXBException {
