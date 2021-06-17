@@ -5,8 +5,10 @@ import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.gcp.pubsub.core.subscriber.PubSubSubscriberTemplate;
 import org.springframework.cloud.gcp.pubsub.support.converter.ConvertedAcknowledgeablePubsubMessage;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
@@ -15,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 @Slf4j
 @Service
@@ -31,7 +34,7 @@ public class PullSubscriptionService {
     public void pullMessage(PubSubSubscriberTemplate subscriberTemplate) throws InterruptedException, ExecutionException, JAXBException, IOException {
 
         List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs = subscriberTemplate
-                .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 1000, true, TeletypeEventDTO.class);
+                .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 100, true, TeletypeEventDTO.class);
 
         LocalDateTime batchReceivedTime = LocalDateTime.now();
 
