@@ -46,16 +46,9 @@ public class SubscriptionProcessingService {
         if (!msgs.isEmpty()) {
             List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> msg.getPayload()).collect(Collectors.toList());
             BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
-            List<CompletableFuture<Void>> futureList  = processSubscriptionMessagesList2(batchRecord);
+            List<CompletableFuture<Void>> futureList  = processSubscriptionMessagesList(batchRecord);
 
             //send acknowledge for all processed messages
-            /*
-            if(future.isDone()) {
-                msgs.forEach(msg -> msg.ack());
-            }
-
-             */
-
             futureList.stream()
                     .map(CompletableFuture::join);
 
@@ -64,7 +57,7 @@ public class SubscriptionProcessingService {
         }
     }
 
-    private List<CompletableFuture<Void>> processSubscriptionMessagesList2(BatchRecord batchRecord) throws InterruptedException, ExecutionException, IOException, JAXBException {
+    private List<CompletableFuture<Void>> processSubscriptionMessagesList(BatchRecord batchRecord) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
         AtomicReference<Integer> sequencerNumber = new AtomicReference<>(1);
 
@@ -82,14 +75,11 @@ public class SubscriptionProcessingService {
                 .collect(Collectors.toList());
 
         //send all processed messages to another topic.
-        //teletypePublisher.processPublish(teletypeEventDTOMessages);
 
-        List<CompletableFuture<Void>> future =
-
-        teletypeEventDTOMessages.stream()
+        List<CompletableFuture<Void>> future = teletypeEventDTOMessages.stream()
                 .map(message -> CompletableFuture.runAsync(() -> {
                     try {
-                         teletypePublisher.processPublish2(message);
+                         teletypePublisher.processPublish(message);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (InterruptedException e) {
@@ -98,110 +88,12 @@ public class SubscriptionProcessingService {
                 },executorService)).collect(Collectors.toList());
 
 
-        //log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
-
         Instant end = Instant.now();
         Long totalTime = Duration.between(start, end).toMillis();
         log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), totalTime);
         batchList.setTime(totalTime);
         Long batchSumTime = batchList.getAllBatchTimeInMillis().stream().reduce(0L, Long::sum);
         //log.info("total time taken for all batches : {} ", Duration.ofMillis(batchSumTime).toMillis());
-
-        return future;
-    }
-
-    private void processSubscriptionMessagesList1(BatchRecord batchRecord) throws InterruptedException, ExecutionException, IOException, JAXBException {
-
-        AtomicReference<Integer> sequencerNumber = new AtomicReference<>(1);
-
-        Instant start = Instant.now();
-
-        List<TeletypeEventDTO> teletypeEventDTOList = null;
-
-        if (!batchRecord.getDtoList().isEmpty())
-            teletypeEventDTOList = batchRecord.getDtoList();
-
-        //log.info("Started processing subscription messages list , total records found : {}", teletypeEventDTOList.size());
-
-
-        Instant s1 = Instant.now();
-        log.info("adding data to list started ");
-
-        /*
-        List<PubsubMessage> teletypeEventDTOMessages = teletypeEventDTOList.stream()
-                .map(record -> wrapTeletypeConversionException(record, sequencerNumber.getAndSet(sequencerNumber.get() + 1), batchRecord.getBatchMessageId()))
-                .collect(Collectors.toList());
-
-         */
-
-        List<CompletableFuture<PubsubMessage>> teletypeEventDTOMessages = teletypeEventDTOList.stream()
-                .map(record -> CompletableFuture.supplyAsync(() -> wrapTeletypeConversionException(record, sequencerNumber.getAndSet(sequencerNumber.get() + 1), batchRecord.getBatchMessageId()), executorService1))
-                .collect(Collectors.toList());
-
-        log.info("total time taken to add all details is {}", Duration.between(s1, Instant.now()).toMillis());
-
-        //send all processed messages to another topic.
-
-
-        Instant t1 = Instant.now();
-        teletypePublisher.processPublish1(teletypeEventDTOMessages);
-        Instant t2 =  Instant.now();
-        log.info("total time taken to publish all msgs is {}", Duration.between(t1, t2).toMillis());
-
-        //log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
-
-        Instant end = Instant.now();
-        Long totalTime = Duration.between(start, end).toMillis();
-        log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), totalTime);
-        batchList.setTime(totalTime);
-        Long batchSumTime = batchList.getAllBatchTimeInMillis().stream().reduce(0L, Long::sum);
-        log.info("total time taken for all batches : {} ", Duration.ofMillis(batchSumTime).toMillis());
-    }
-
-    private CompletableFuture<Void> processSubscriptionMessagesList(BatchRecord batchRecord) throws InterruptedException, ExecutionException, IOException, JAXBException {
-
-        AtomicReference<Integer> sequencerNumber = new AtomicReference<>(1);
-
-        Instant start = Instant.now();
-
-        List<TeletypeEventDTO> teletypeEventDTOList = null;
-
-        if (!batchRecord.getDtoList().isEmpty())
-            teletypeEventDTOList = batchRecord.getDtoList();
-
-        //log.info("Started processing subscription messages list , total records found : {}", teletypeEventDTOList.size());
-
-        List<PubsubMessage> teletypeEventDTOMessages = teletypeEventDTOList.stream()
-                .map(record -> wrapTeletypeConversionException(record, sequencerNumber.getAndSet(sequencerNumber.get() + 1), batchRecord.getBatchMessageId()))
-                .collect(Collectors.toList());
-
-        //send all processed messages to another topic.
-        //teletypePublisher.processPublish(teletypeEventDTOMessages);
-
-        CompletableFuture<Void> future =
-
-                CompletableFuture.runAsync(() -> {
-            try {
-                teletypePublisher.processPublish(teletypeEventDTOMessages);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (JAXBException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }, executorService);
-
-        //log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
-
-        Instant end = Instant.now();
-        Long totalTime = Duration.between(start, end).toMillis();
-        log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), totalTime);
-        batchList.setTime(totalTime);
-        Long batchSumTime = batchList.getAllBatchTimeInMillis().stream().reduce(0L, Long::sum);
-        log.info("total time taken for all batches : {} ", Duration.ofMillis(batchSumTime).toMillis());
 
         return future;
     }

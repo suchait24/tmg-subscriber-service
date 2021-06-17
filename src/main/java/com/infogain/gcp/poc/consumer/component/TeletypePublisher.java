@@ -17,26 +17,9 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class TeletypePublisher {
 
-    private final BatchPublisher batchPublisher;
     private final BasicPublisher basicPublisher;
 
-    public void processPublish(List<PubsubMessage> teletypeDataDTOMessagesList) throws InterruptedException, ExecutionException, JAXBException, IOException {
-        //log.info("Publishing the message to topic.");
-
-        //log.info("All messages List : {}", String.valueOf(teletypeDataDTOMessagesList));
-        batchPublisher.publishMessage(teletypeDataDTOMessagesList);
-        //log.info("Messages have been successfully published.");
-    }
-
-    public void processPublish1(List<CompletableFuture<PubsubMessage>> teletypeDataDTOMessagesList) throws InterruptedException, ExecutionException, JAXBException, IOException {
-        //log.info("Publishing the message to topic.");
-
-        //log.info("All messages List : {}", String.valueOf(teletypeDataDTOMessagesList));
-        basicPublisher.publishMessage(teletypeDataDTOMessagesList);
-        //log.info("Messages have been successfully published.");
-    }
-
-    public void processPublish2(PubsubMessage pubsubMessage) throws IOException, InterruptedException {
+    public void processPublish(PubsubMessage pubsubMessage) throws IOException, InterruptedException {
         basicPublisher.publishSingleMessage(pubsubMessage);
     }
 }
