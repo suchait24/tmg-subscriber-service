@@ -42,6 +42,9 @@ public class SubscriptionProcessingService {
     public void processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, LocalDateTime batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
         if (!msgs.isEmpty()) {
+
+            log.info("Number of processors available : {}", Runtime.getRuntime().availableProcessors());
+
             List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> msg.getPayload()).collect(Collectors.toList());
             BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
             List<CompletableFuture<Void>> futureList  = processSubscriptionMessagesList(batchRecord);
