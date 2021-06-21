@@ -2,7 +2,9 @@ package com.infogain.gcp.poc.consumer.pubsub;
 
 import com.infogain.gcp.poc.consumer.service.PullSubscriptionService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 public class StartProcessing {
 
     private final PullSubscriptionService pullDemo;
+    private final TaskExecutor taskExecutor;
 
     @PostConstruct
     void runPullAlways() {
@@ -41,5 +44,4 @@ public class StartProcessing {
         subscriberThread.setName("subscriber-background-thread");
         subscriberThread.start();
     }
-
 }
