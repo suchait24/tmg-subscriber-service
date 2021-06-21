@@ -72,7 +72,8 @@ public class SubscriptionProcessingService {
 
         Instant start = Instant.now();
 
-        List<TeletypeEventDTO> teletypeEventDTOList = null;
+        log.info("any change")
+;        List<TeletypeEventDTO> teletypeEventDTOList = null;
 
         if (!batchRecord.getDtoList().isEmpty())
             teletypeEventDTOList = batchRecord.getDtoList();
