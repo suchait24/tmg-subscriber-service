@@ -40,11 +40,8 @@ public class BatchService {
         if (!batchRecord.getDtoList().isEmpty())
             teletypeEventDTOList = batchRecord.getDtoList();
 
-        List<PubsubMessage> teletypeEventDTOMessages = teletypeEventDTOList.stream()
-                .map(record -> wrapTeletypeConversionException(record, sequencerNumber.getAndSet(sequencerNumber.get() + 1), batchRecord.getBatchMessageId()))
-                .collect(Collectors.toList());
+        List<PubsubMessage> teletypeEventDTOMessages = preparePubSubMessageList(teletypeEventDTOList, sequencerNumber, batchRecord);
 
-        //send all processed messages to another topic.
         List<CompletableFuture<Void>> futureList = publishInParallel(teletypeEventDTOMessages);
 
 
@@ -76,5 +73,12 @@ public class BatchService {
                         log.error("Error occurred : {}", e.getMessage());
                     }
                 }, THREAD_POOL)).collect(Collectors.toList());
+    }
+
+    private List<PubsubMessage> preparePubSubMessageList(List<TeletypeEventDTO> teletypeEventDTOList, AtomicReference<Integer> sequenceNumber, BatchRecord batchRecord) {
+
+        return teletypeEventDTOList.stream()
+                .map(record -> wrapTeletypeConversionException(record, sequenceNumber.getAndSet(sequenceNumber.get() + 1), batchRecord.getBatchMessageId()))
+                .collect(Collectors.toList());
     }
 }
