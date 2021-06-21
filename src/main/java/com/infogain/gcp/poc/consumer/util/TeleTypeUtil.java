@@ -1,6 +1,6 @@
 package com.infogain.gcp.poc.consumer.util;
 
-import com.infogain.gcp.poc.consumer.dto.MessageDTO;
+import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.xml.bind.JAXBContext;
@@ -11,27 +11,27 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 @Slf4j
-public class MessageUtil {
+public class TeleTypeUtil {
 
-    public static MessageDTO unmarshall(String message) throws JAXBException {
+    public static TeletypeEventDTO unmarshall(String message) throws JAXBException {
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(MessageDTO.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(TeletypeEventDTO.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-        MessageDTO messageDTO = (MessageDTO) unmarshaller.unmarshal(new StringReader(message));
+        TeletypeEventDTO teletypeEventDTO = (TeletypeEventDTO) unmarshaller.unmarshal(new StringReader(message));
 
         //log.info("message dto generated : {}", messageDTO);
 
-        return messageDTO;
+        return teletypeEventDTO;
     }
 
-    public static String marshall(MessageDTO messageDTO) throws JAXBException {
+    public static String marshall(TeletypeEventDTO teletypeEventDTO) throws JAXBException {
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(MessageDTO.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(TeletypeEventDTO.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
 
         StringWriter stringWriter = new StringWriter();
-        marshaller.marshal(messageDTO, stringWriter);
+        marshaller.marshal(teletypeEventDTO, stringWriter);
 
         String result = stringWriter.toString();
         //log.info("Message XML generated : {}", result);
