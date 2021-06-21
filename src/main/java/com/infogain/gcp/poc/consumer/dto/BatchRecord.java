@@ -1,6 +1,5 @@
 package com.infogain.gcp.poc.consumer.dto;
 
-import com.google.cloud.Timestamp;
 import lombok.Getter;
 import lombok.Setter;
 
