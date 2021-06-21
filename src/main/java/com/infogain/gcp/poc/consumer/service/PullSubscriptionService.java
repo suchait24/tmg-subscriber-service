@@ -1,7 +1,7 @@
 package com.infogain.gcp.poc.consumer.service;
 
 import com.google.pubsub.v1.ProjectSubscriptionName;
-import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
+import com.infogain.gcp.poc.consumer.dto.MessageDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,10 +33,12 @@ public class PullSubscriptionService {
 
     public void pullMessage(PubSubSubscriberTemplate subscriberTemplate) throws InterruptedException, ExecutionException, JAXBException, IOException {
 
-        List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs = subscriberTemplate
-                .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 100, true, TeletypeEventDTO.class);
+        List<ConvertedAcknowledgeablePubsubMessage<MessageDTO>> msgs = subscriberTemplate
+                .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 100, true, MessageDTO.class);
 
         LocalDateTime batchReceivedTime = LocalDateTime.now();
+
+        msgs.forEach(msg -> msg.getPayload().getMessageBody());
 
         //acknowledge only when batch is successfully processed.
         subscriptionProcessingService.processMessages(msgs, batchReceivedTime);

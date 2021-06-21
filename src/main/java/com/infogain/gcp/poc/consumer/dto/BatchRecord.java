@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 public class BatchRecord {
 
-    private List<TeletypeEventDTO> dtoList;
+    private List<MessageDTO> dtoList;
     private Integer batchMessageId;
     private LocalDateTime batchReceivedTime;
 }

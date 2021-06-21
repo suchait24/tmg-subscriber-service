@@ -1,7 +1,7 @@
 package com.infogain.gcp.poc.consumer.pubsub;
 
 import com.google.pubsub.v1.PubsubMessage;
-import com.infogain.gcp.poc.consumer.util.TeleTypeUtil;
+import com.infogain.gcp.poc.consumer.util.MessageUtil;
 import lombok.SneakyThrows;
 import org.springframework.cloud.gcp.pubsub.support.converter.PubSubMessageConverter;
 
@@ -17,6 +17,6 @@ public class XmlPubSubMessageConverter implements PubSubMessageConverter {
     @SneakyThrows
     @Override
     public <T> T fromPubSubMessage(PubsubMessage message, Class<T> payloadType) {
-        return (T) TeleTypeUtil.unmarshall(message.getData().toStringUtf8());
+        return (T) MessageUtil.unmarshall(message.getData().toStringUtf8());
     }
 }
