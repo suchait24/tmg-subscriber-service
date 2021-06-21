@@ -40,6 +40,9 @@ info:
 app:
   subscription:
     id: tty-topic-sub
+    max:
+      pull:
+        count: 100
   topic:
     name: projects/sab-ors-poc-sbx-01-9096/topics/teletype-poc-topic
 

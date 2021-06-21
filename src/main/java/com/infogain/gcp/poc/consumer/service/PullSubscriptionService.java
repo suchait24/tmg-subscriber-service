@@ -1,23 +1,18 @@
 package com.infogain.gcp.poc.consumer.service;
 
-import com.google.pubsub.v1.ProjectSubscriptionName;
-import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
+
+import com.google.pubsub.v1.ReceivedMessage;
+import com.infogain.gcp.poc.consumer.component.PubSubSubscriber;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cloud.gcp.pubsub.core.subscriber.PubSubSubscriberTemplate;
-import org.springframework.cloud.gcp.pubsub.support.converter.ConvertedAcknowledgeablePubsubMessage;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
 
 @Slf4j
 @Service
@@ -26,20 +21,25 @@ public class PullSubscriptionService {
 
     @Value("${spring.cloud.gcp.project-id}")
     private String projectId;
+
     @Value("${app.subscription.id}")
     private String subscriptionId;
 
+    @Value("${app.subscription.max.pull.count}")
+    private Integer maxMessagePullCount;
+
     private final SubscriptionProcessingService subscriptionProcessingService;
+    private final PubSubSubscriber pubSubSubscriber;
 
-    public void pullMessage(PubSubSubscriberTemplate subscriberTemplate) throws InterruptedException, ExecutionException, JAXBException, IOException {
+    public void pullMessages() throws InterruptedException, ExecutionException, JAXBException, IOException {
 
-        List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs = subscriberTemplate
-                .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 100, true, TeletypeEventDTO.class);
+        List<ReceivedMessage> receivedMessageList = pubSubSubscriber.getPullResponse();
 
-        LocalDateTime batchReceivedTime = LocalDateTime.now();
-
-        //acknowledge only when batch is successfully processed.
-        subscriptionProcessingService.processMessages(msgs, batchReceivedTime);
+        if(!receivedMessageList.isEmpty()) {
+            LocalDateTime batchReceivedTime = LocalDateTime.now();
+            List<String> ackIds = subscriptionProcessingService.processMessages(receivedMessageList, batchReceivedTime);
+            pubSubSubscriber.acknowledgeMessageList(ackIds);
+        }
     }
 
 }

@@ -2,7 +2,7 @@ package com.infogain.gcp.poc.consumer.service;
 
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
-import com.infogain.gcp.poc.consumer.component.BatchList;
+import com.google.pubsub.v1.ReceivedMessage;
 import com.infogain.gcp.poc.consumer.component.TeletypePublisher;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
@@ -10,7 +10,6 @@ import com.infogain.gcp.poc.consumer.util.BatchRecordUtil;
 import com.infogain.gcp.poc.consumer.util.TeleTypeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.gcp.pubsub.support.converter.ConvertedAcknowledgeablePubsubMessage;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
@@ -21,7 +20,10 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -35,17 +37,23 @@ public class SubscriptionProcessingService {
     private static final String CREATED_TIME = "created_time";
 
     private final TeletypePublisher teletypePublisher;
-    BatchList batchList = new BatchList();
-
     private final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    public void processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, LocalDateTime batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
-
-        if (!msgs.isEmpty()) {
+    public List<String> processMessages(List<ReceivedMessage> msgs, LocalDateTime batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
             log.info("Number of processors available : {}", Runtime.getRuntime().availableProcessors());
 
-            List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> msg.getPayload()).collect(Collectors.toList());
+            //TODO - fix this once tested
+            List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> {
+                try {
+                    return TeleTypeUtil.unmarshall(msg.getMessage().getData().toStringUtf8());
+                } catch (JAXBException e) {
+                    log.error("error occurred : {}", e.getMessage());
+                }
+                return null;
+            }).collect(Collectors.toList());
+
+
             BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
             List<CompletableFuture<Void>> futureList  = processSubscriptionMessagesList(batchRecord);
 
@@ -53,9 +61,9 @@ public class SubscriptionProcessingService {
             futureList.stream()
                     .map(CompletableFuture::join);
 
-            msgs.forEach(msg -> msg.ack());
-
-        }
+            return msgs.stream()
+                    .map(msg -> msg.getAckId())
+                    .collect(Collectors.toList());
     }
 
     private List<CompletableFuture<Void>> processSubscriptionMessagesList(BatchRecord batchRecord) throws InterruptedException, ExecutionException, IOException, JAXBException {
@@ -92,9 +100,6 @@ public class SubscriptionProcessingService {
         Instant end = Instant.now();
         Long totalTime = Duration.between(start, end).toMillis();
         log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), totalTime);
-        batchList.setTime(totalTime);
-        Long batchSumTime = batchList.getAllBatchTimeInMillis().stream().reduce(0L, Long::sum);
-        //log.info("total time taken for all batches : {} ", Duration.ofMillis(batchSumTime).toMillis());
 
         return futureList;
     }
