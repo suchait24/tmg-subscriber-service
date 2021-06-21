@@ -22,7 +22,7 @@ public class StartProcessing {
 
     @PostConstruct
     void runPullAlways() {
-        log.info("Start pull mechanism in background.");
+        log.info("Starting pull mechanism in background.");
 
         //We can use a thread pool as well rather than using single thread.
         Thread subscriberThread = new Thread(() -> {
