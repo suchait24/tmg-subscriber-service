@@ -1,4 +1,4 @@
-package com.infogain.gcp.poc.consumer.pubsub;
+package com.infogain.gcp.poc.consumer.config;
 
 import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PullRequest;

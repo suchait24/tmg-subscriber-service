@@ -1,9 +1,7 @@
 package com.infogain.gcp.poc.consumer.component;
 
-import com.google.api.core.ApiFuture;
 import com.google.cloud.pubsub.v1.stub.GrpcSubscriberStub;
 import com.google.cloud.pubsub.v1.stub.SubscriberStubSettings;
-import com.google.protobuf.Empty;
 import com.google.pubsub.v1.AcknowledgeRequest;
 import com.google.pubsub.v1.PullRequest;
 import com.google.pubsub.v1.PullResponse;
@@ -47,7 +45,10 @@ public class PubSubSubscriber {
     }
 
     public void acknowledgeMessageList(List<String> ackIds) {
-        AcknowledgeRequest acknowledgeRequest = AcknowledgeRequest.newBuilder().addAllAckIds(ackIds).setSubscription(this.pullRequest.getSubscription()).build();
+        AcknowledgeRequest acknowledgeRequest = AcknowledgeRequest.newBuilder()
+                .addAllAckIds(ackIds)
+                .setSubscription(this.pullRequest.getSubscription()).build();
+
         this.grpcSubscriberStub.acknowledgeCallable().futureCall(acknowledgeRequest);
     }
 }
