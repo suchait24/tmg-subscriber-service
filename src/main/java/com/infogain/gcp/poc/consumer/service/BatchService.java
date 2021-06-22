@@ -4,6 +4,7 @@ import com.google.pubsub.v1.PubsubMessage;
 import com.infogain.gcp.poc.consumer.component.TeletypePublisher;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
+import com.infogain.gcp.poc.consumer.test.BatchList;
 import com.infogain.gcp.poc.consumer.util.PubSubMessageHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class BatchService {
 
     private final TeletypePublisher teletypePublisher;
     private final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    BatchList batchList = new BatchList();
 
     protected List<CompletableFuture<Void>> processSubscriptionMessagesList(BatchRecord batchRecord) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
@@ -48,6 +50,10 @@ public class BatchService {
         Instant end = Instant.now();
         Long totalTime = Duration.between(start, end).toMillis();
         log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), totalTime);
+
+        batchList.setTime(totalTime);
+        Long batchSumTime = batchList.getAllBatchTimeInMillis().stream().reduce(0L, Long::sum);
+        log.info("total time taken for all batches : {} ", Duration.ofMillis(batchSumTime).toMillis());
 
         return futureList;
     }
