@@ -73,6 +73,7 @@
 			<version>${jaxb.api.version}</version>
 		</dependency>
 
+		<!-- google cloud dependencies -->
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-pubsub</artifactId>

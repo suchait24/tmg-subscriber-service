@@ -22,6 +22,9 @@ public class PubSubConfig {
     @Value("${app.subscription.max.pull.count}")
     private Integer maxMessagePullCount;
 
+    @Value("${app.topic.name}")
+    private String topicName;
+
     @Bean
     public PullRequest getPullRequest() {
 
@@ -31,6 +34,11 @@ public class PubSubConfig {
                                 .toString()).setMaxMessages(maxMessagePullCount);
 
         return builder.build();
+    }
+
+    @Bean(name = "teletypetopicName")
+    public String topicName() {
+        return topicName;
     }
 
 }

@@ -1,11 +1,9 @@
 package com.infogain.gcp.poc.consumer.component;
 
+
 import com.google.cloud.pubsub.v1.stub.GrpcSubscriberStub;
 import com.google.cloud.pubsub.v1.stub.SubscriberStubSettings;
-import com.google.pubsub.v1.AcknowledgeRequest;
-import com.google.pubsub.v1.PullRequest;
-import com.google.pubsub.v1.PullResponse;
-import com.google.pubsub.v1.ReceivedMessage;
+import com.google.pubsub.v1.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
@@ -20,13 +18,16 @@ public class PubSubSubscriber {
 
     private PullRequest pullRequest;
     private GrpcSubscriberStub grpcSubscriberStub;
+    private boolean useRetrySettings;
+    private boolean useModifyAckSettings;
+    private boolean useExecutorProvider;
 
-    public PubSubSubscriber(PullRequest pullRequest) {
+    public PubSubSubscriber(PullRequest pullRequest) throws IOException {
         this.pullRequest = pullRequest;
         this.grpcSubscriberStub = getSubscriberStub();
     }
 
-    private GrpcSubscriberStub getSubscriberStub() {
+    private GrpcSubscriberStub getSubscriberStub() throws IOException {
 
         SubscriberStubSettings.Builder subscriberStubSettings = SubscriberStubSettings.newBuilder();
 

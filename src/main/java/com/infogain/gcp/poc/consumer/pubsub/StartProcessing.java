@@ -18,7 +18,6 @@ import java.util.concurrent.ExecutionException;
 public class StartProcessing {
 
     private final PullSubscriptionService pullDemo;
-    private final TaskExecutor taskExecutor;
 
     @PostConstruct
     void runPullAlways() {
