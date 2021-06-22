@@ -34,10 +34,15 @@ public class SubscriptionProcessingService {
             List<CompletableFuture<Void>> futureList  = batchService.processSubscriptionMessagesList(batchRecord);
 
             //send acknowledge for all processed messages
-            futureList.stream()
-                    .map(CompletableFuture::join);
+            //futureList.stream()
+              //      .map(CompletableFuture::join);
 
-            return receivedMessageList.stream()
+        CompletableFuture[] cfs = futureList.toArray(new CompletableFuture[futureList.size()]);
+        CompletableFuture.allOf(cfs)
+                .thenApply(ignored -> futureList.stream()
+                .map(CompletableFuture::join));
+
+        return receivedMessageList.stream()
                     .map(msg -> msg.getAckId())
                     .collect(Collectors.toList());
     }

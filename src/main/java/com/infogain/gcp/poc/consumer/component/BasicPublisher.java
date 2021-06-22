@@ -14,7 +14,7 @@ import java.util.concurrent.*;
 @Service
 public class BasicPublisher {
 
-    private PubSubPublisher pubSubPublisher;
+    private final PubSubPublisher pubSubPublisher;
 
     public void publishSingleMessage(PubsubMessage message) throws IOException, InterruptedException {
 
@@ -22,13 +22,14 @@ public class BasicPublisher {
 
         try {
             pubSubPublisher.getPublisher().publish(message);
-            //log.info("message published.");
         } finally {
+            /*
             if (publisher != null) {
                 // When finished with the publisher, shutdown to free up resources.
                 publisher.shutdown();
                 publisher.awaitTermination(1, TimeUnit.MINUTES);
             }
+             */
         }
 
     }
