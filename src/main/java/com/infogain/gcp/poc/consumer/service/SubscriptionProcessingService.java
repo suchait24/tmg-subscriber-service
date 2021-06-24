@@ -26,25 +26,23 @@ public class SubscriptionProcessingService {
 
     public List<String> processMessages(List<ReceivedMessage> receivedMessageList, LocalDateTime batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
-            log.info("Number of processors available : {}", Runtime.getRuntime().availableProcessors());
+        log.info("Number of processors available : {}", Runtime.getRuntime().availableProcessors());
 
-            List<TeletypeEventDTO> teletypeEventDTOList = retrieveTeletypeEventDTOList(receivedMessageList);
+        List<TeletypeEventDTO> teletypeEventDTOList = retrieveTeletypeEventDTOList(receivedMessageList);
 
-            BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
-            List<CompletableFuture<Void>> futureList  = batchService.processSubscriptionMessagesList(batchRecord);
+        BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
+        List<CompletableFuture<Void>> futureList = batchService.processSubscriptionMessagesList(batchRecord);
 
-            //send acknowledge for all processed messages
-            //futureList.stream()
-              //      .map(CompletableFuture::join);
+        //send acknowledge for all processed messages
 
         CompletableFuture[] cfs = futureList.toArray(new CompletableFuture[futureList.size()]);
         CompletableFuture.allOf(cfs)
-                .thenApply(ignored -> futureList.stream()
-                .map(CompletableFuture::join));
+                .thenApply(future -> futureList.stream()
+                        .map(CompletableFuture::join));
 
         return receivedMessageList.stream()
-                    .map(msg -> msg.getAckId())
-                    .collect(Collectors.toList());
+                .map(msg -> msg.getAckId())
+                .collect(Collectors.toList());
     }
 
     private List<TeletypeEventDTO> retrieveTeletypeEventDTOList(List<ReceivedMessage> receivedMessageList) {

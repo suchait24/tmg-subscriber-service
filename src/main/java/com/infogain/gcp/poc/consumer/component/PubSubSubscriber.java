@@ -1,6 +1,9 @@
 package com.infogain.gcp.poc.consumer.component;
 
 
+import com.google.api.gax.core.ExecutorProvider;
+import com.google.api.gax.core.InstantiatingExecutorProvider;
+import com.google.cloud.pubsub.v1.Subscriber;
 import com.google.cloud.pubsub.v1.stub.GrpcSubscriberStub;
 import com.google.cloud.pubsub.v1.stub.SubscriberStubSettings;
 import com.google.pubsub.v1.*;
@@ -30,6 +33,19 @@ public class PubSubSubscriber {
     private GrpcSubscriberStub getSubscriberStub() throws IOException {
 
         SubscriberStubSettings.Builder subscriberStubSettings = SubscriberStubSettings.newBuilder();
+
+        ExecutorProvider executorProvider =
+                InstantiatingExecutorProvider.newBuilder().setExecutorThreadCount(8).build();
+
+        subscriberStubSettings.setExecutorProvider(executorProvider);
+        /*
+        subscriberStubSettings
+                .setTransportChannelProvider(SubscriberStubSettings
+                        .defaultGrpcTransportProviderBuilder()
+                        .setMaxInboundMessageSize(20 * 1024 * 1024)
+                        .build());
+
+         */
 
         try {
             this.grpcSubscriberStub = GrpcSubscriberStub.create(subscriberStubSettings.build());

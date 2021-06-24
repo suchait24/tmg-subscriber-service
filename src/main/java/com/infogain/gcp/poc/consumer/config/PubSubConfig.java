@@ -2,6 +2,7 @@ package com.infogain.gcp.poc.consumer.config;
 
 import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PullRequest;
+import com.google.pubsub.v1.StreamingPullRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

@@ -42,7 +42,7 @@ app:
     id: tty-topic-sub
     max:
       pull:
-        count: 100
+        count: 500
   topic:
     name: projects/sab-ors-poc-sbx-01-9096/topics/teletype-ingest-service-topic
 
