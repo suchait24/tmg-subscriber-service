@@ -16,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,8 +62,8 @@ public class BatchServiceTests {
         });
         futureList.add(future1);
 
-        //List<CompletableFuture<Void>> completableFutures =  batchService.processSubscriptionMessagesList(batchRecord);
-        //Assertions.assertEquals(completableFutures.size(), 2);
+        List<CompletableFuture<Void>> completableFutures =  batchService.processSubscriptionMessagesList(batchRecord, Instant.now());
+        Assertions.assertEquals(completableFutures.size(), 2);
     }
 
     @Test

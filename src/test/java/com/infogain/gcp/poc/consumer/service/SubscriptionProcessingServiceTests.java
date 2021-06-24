@@ -16,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,10 +55,10 @@ public class SubscriptionProcessingServiceTests {
         });
         futureList.add(future1);
 
-        //Mockito.when(batchService.processSubscriptionMessagesList(Mockito.anyObject())).thenReturn(futureList);
-        //List<String> ackIds = subscriptionProcessingService.processMessages(receivedMessageList, LocalDateTime.now());
+        Mockito.when(batchService.processSubscriptionMessagesList(Mockito.anyObject(), Mockito.anyObject())).thenReturn(futureList);
+        List<String> ackIds = subscriptionProcessingService.processMessages(receivedMessageList, LocalDateTime.now(), Instant.now());
 
-        //Assertions.assertEquals(ackIds.size(), 1);
+        Assertions.assertEquals(ackIds.size(), 1);
 
     }
 
