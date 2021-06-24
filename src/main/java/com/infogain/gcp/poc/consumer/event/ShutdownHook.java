@@ -2,6 +2,7 @@ package com.infogain.gcp.poc.consumer.event;
 
 import com.google.cloud.pubsub.v1.Publisher;
 import com.infogain.gcp.poc.consumer.component.PubSubPublisher;
+import com.infogain.gcp.poc.consumer.component.PubSubSubscriber;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.ApplicationListener;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class ShutdownHook implements ApplicationListener<ContextClosedEvent> {
 
     private final PubSubPublisher pubSubPublisher;
+    private final PubSubSubscriber pubSubSubscriber;
 
     @SneakyThrows
     @Override
@@ -30,6 +32,10 @@ public class ShutdownHook implements ApplicationListener<ContextClosedEvent> {
             Publisher publisher = pubSubPublisher.getPublisher();
             publisher.shutdown();
             publisher.awaitTermination(1, TimeUnit.MINUTES);
+        }
+
+        if(pubSubSubscriber != null){
+            pubSubSubscriber.getGrpcSubscriberStub().close();
         }
     }
 }
