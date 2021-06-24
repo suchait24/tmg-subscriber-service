@@ -11,6 +11,7 @@ import org.springframework.util.StopWatch;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -26,16 +27,13 @@ public class PullSubscriptionService {
 
     public void pullMessages() throws InterruptedException, ExecutionException, JAXBException, IOException {
 
-        stopWatch.start();
         List<ReceivedMessage> receivedMessageList = pubSubSubscriber.getPullResponse();
-        stopWatch.stop();
 
         if(!receivedMessageList.isEmpty()) {
 
-            log.info("{} messages consumed in : {} secs ", receivedMessageList.size(), stopWatch.getTotalTimeSeconds());
-
+            Instant startTime = Instant.now();
             LocalDateTime batchReceivedTime = LocalDateTime.now();
-            List<String> ackIds = subscriptionProcessingService.processMessages(receivedMessageList, batchReceivedTime);
+            List<String> ackIds = subscriptionProcessingService.processMessages(receivedMessageList, batchReceivedTime,  startTime);
             pubSubSubscriber.acknowledgeMessageList(ackIds);
         }
     }

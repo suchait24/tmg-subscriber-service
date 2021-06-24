@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -24,14 +25,14 @@ public class SubscriptionProcessingService {
 
     private final BatchService batchService;
 
-    public List<String> processMessages(List<ReceivedMessage> receivedMessageList, LocalDateTime batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
+    public List<String> processMessages(List<ReceivedMessage> receivedMessageList, LocalDateTime batchReceivedTime, Instant startTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
         log.info("Number of processors available : {}", Runtime.getRuntime().availableProcessors());
 
         List<TeletypeEventDTO> teletypeEventDTOList = retrieveTeletypeEventDTOList(receivedMessageList);
 
         BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
-        List<CompletableFuture<Void>> futureList = batchService.processSubscriptionMessagesList(batchRecord);
+        List<CompletableFuture<Void>> futureList = batchService.processSubscriptionMessagesList(batchRecord, startTime);
 
         //send acknowledge for all processed messages
 

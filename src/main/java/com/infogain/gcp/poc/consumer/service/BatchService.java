@@ -30,11 +30,11 @@ public class BatchService {
     private final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
 
-    public List<CompletableFuture<Void>> processSubscriptionMessagesList(BatchRecord batchRecord) throws InterruptedException, ExecutionException, IOException, JAXBException {
+    public List<CompletableFuture<Void>> processSubscriptionMessagesList(BatchRecord batchRecord, Instant startTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
         AtomicReference<Integer> sequencerNumber = new AtomicReference<>(1);
 
-        Instant start = Instant.now();
+        //Instant start = Instant.now();
 
         List<TeletypeEventDTO> teletypeEventDTOList = null;
 
@@ -47,7 +47,7 @@ public class BatchService {
 
 
         Instant end = Instant.now();
-        Long totalTime = Duration.between(start, end).toMillis();
+        Long totalTime = Duration.between(startTime, end).toMillis();
         log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), totalTime);
         return futureList;
     }
