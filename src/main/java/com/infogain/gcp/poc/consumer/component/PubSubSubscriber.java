@@ -20,9 +20,6 @@ public class PubSubSubscriber {
 
     private PullRequest pullRequest;
     private GrpcSubscriberStub grpcSubscriberStub;
-    private boolean useRetrySettings;
-    private boolean useModifyAckSettings;
-    private boolean useExecutorProvider;
 
     public PubSubSubscriber(PullRequest pullRequest) throws IOException {
         this.pullRequest = pullRequest;
@@ -37,14 +34,6 @@ public class PubSubSubscriber {
                 InstantiatingExecutorProvider.newBuilder().setExecutorThreadCount(8).build();
 
         subscriberStubSettings.setExecutorProvider(executorProvider);
-        /*
-        subscriberStubSettings
-                .setTransportChannelProvider(SubscriberStubSettings
-                        .defaultGrpcTransportProviderBuilder()
-                        .setMaxInboundMessageSize(20 * 1024 * 1024)
-                        .build());
-
-         */
 
         try {
             this.grpcSubscriberStub = GrpcSubscriberStub.create(subscriberStubSettings.build());
