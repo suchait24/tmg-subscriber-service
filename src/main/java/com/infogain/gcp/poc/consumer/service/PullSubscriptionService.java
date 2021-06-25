@@ -22,7 +22,6 @@ public class PullSubscriptionService {
 
     private final SubscriptionProcessingService subscriptionProcessingService;
     private final PubSubSubscriber pubSubSubscriber;
-    StopWatch stopWatch = new StopWatch();
 
     public void pullMessages() throws InterruptedException, ExecutionException, JAXBException, IOException {
 
