@@ -78,6 +78,11 @@
 			<artifactId>google-cloud-pubsub</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<dependencyManagement>
@@ -89,6 +94,15 @@
 					<type>pom</type>
 					<scope>import</scope>
 				</dependency>
+
+					<dependency>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-dependencies</artifactId>
+						<version>${spring-boot-release.version}</version>
+						<type>pom</type>
+						<scope>import</scope>
+					</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
