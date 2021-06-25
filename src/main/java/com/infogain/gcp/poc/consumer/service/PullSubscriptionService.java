@@ -1,6 +1,5 @@
 package com.infogain.gcp.poc.consumer.service;
 
-
 import com.google.pubsub.v1.ReceivedMessage;
 import com.infogain.gcp.poc.consumer.component.PubSubSubscriber;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +28,7 @@ public class PullSubscriptionService {
 
         List<ReceivedMessage> receivedMessageList = pubSubSubscriber.getPullResponse();
 
+        //acknowledge only when batch is successfully processed.
         if(!receivedMessageList.isEmpty()) {
 
             Instant startTime = Instant.now();
