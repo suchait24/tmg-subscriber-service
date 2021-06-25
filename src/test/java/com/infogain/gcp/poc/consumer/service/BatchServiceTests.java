@@ -4,8 +4,11 @@ package com.infogain.gcp.poc.consumer.service;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
 import com.infogain.gcp.poc.consumer.component.TeletypePublisher;
+import com.infogain.gcp.poc.consumer.dto.AddressLine;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
+import com.infogain.gcp.poc.consumer.dto.MessageBody;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
+import com.infogain.gcp.poc.consumer.helper.TeletypeEventDTOUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,17 +43,10 @@ public class BatchServiceTests {
         batchRecord.setBatchMessageId(12);
         batchRecord.setBatchReceivedTime(LocalDateTime.now());
 
-        TeletypeEventDTO dto1 = new TeletypeEventDTO();
-        dto1.setCarrierCode("123");
-        dto1.setHostRecordLocator("AAA");
-        dto1.setMessageCorelationId(1234L);
 
-        TeletypeEventDTO dto2 = new TeletypeEventDTO();
-        dto2.setCarrierCode("123");
-        dto2.setHostRecordLocator("AAA");
-        dto2.setMessageCorelationId(1234L);
+       TeletypeEventDTO teletypeEventDTO = TeletypeEventDTOUtil.getDefaultTeletypeEventDTO();
 
-        List<TeletypeEventDTO> teletypeEventDTOList = List.of(dto1, dto2);
+        List<TeletypeEventDTO> teletypeEventDTOList = List.of(teletypeEventDTO);
         batchRecord.setDtoList(teletypeEventDTOList);
 
         List<CompletableFuture<Void>> futureList = new ArrayList<>();
@@ -63,7 +59,7 @@ public class BatchServiceTests {
         futureList.add(future1);
 
         List<CompletableFuture<Void>> completableFutures =  batchService.processSubscriptionMessagesList(batchRecord, Instant.now());
-        Assertions.assertEquals(completableFutures.size(), 2);
+        Assertions.assertEquals(completableFutures.size(), 1);
     }
 
     @Test
@@ -83,35 +79,24 @@ public class BatchServiceTests {
     @Test
     public void testPreparePubSubMessageList() {
 
-        TeletypeEventDTO dto1 = new TeletypeEventDTO();
-        dto1.setCarrierCode("123");
-        dto1.setHostRecordLocator("AAA");
-        dto1.setMessageCorelationId(1234L);
+        TeletypeEventDTO teletypeEventDTO = TeletypeEventDTOUtil.getDefaultTeletypeEventDTO();
 
-        TeletypeEventDTO dto2 = new TeletypeEventDTO();
-        dto2.setCarrierCode("123");
-        dto2.setHostRecordLocator("AAA");
-        dto2.setMessageCorelationId(1234L);
-
-        List<TeletypeEventDTO> teletypeEventDTOList = List.of(dto1, dto2);
+        List<TeletypeEventDTO> teletypeEventDTOList = List.of(teletypeEventDTO);
         AtomicReference<Integer> sequencerNumber = new AtomicReference<>(1);
 
         BatchRecord batchRecord = new BatchRecord();
         batchRecord.setBatchMessageId(12);
 
         List<PubsubMessage> pubsubMessageList = ReflectionTestUtils.invokeMethod(batchService, "preparePubSubMessageList", teletypeEventDTOList, sequencerNumber, batchRecord);
-        Assertions.assertEquals(pubsubMessageList.size(), 2);
+        Assertions.assertEquals(pubsubMessageList.size(), 1);
     }
 
     @Test
     public void testWrapTeletypeConversionException() {
 
-        TeletypeEventDTO dto1 = new TeletypeEventDTO();
-        dto1.setCarrierCode("123");
-        dto1.setHostRecordLocator("AAA");
-        dto1.setMessageCorelationId(1234L);
+        TeletypeEventDTO teletypeEventDTO = TeletypeEventDTOUtil.getDefaultTeletypeEventDTO();
 
-        PubsubMessage pubsubMessage = ReflectionTestUtils.invokeMethod(batchService, "wrapTeletypeConversionException", dto1, 1, 12);
+        PubsubMessage pubsubMessage = ReflectionTestUtils.invokeMethod(batchService, "wrapTeletypeConversionException", teletypeEventDTO, 1, 12);
         Assertions.assertNotNull(pubsubMessage);
 
     }

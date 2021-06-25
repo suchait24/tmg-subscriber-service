@@ -3,7 +3,10 @@ package com.infogain.gcp.poc.consumer.service;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.ReceivedMessage;
+import com.infogain.gcp.poc.consumer.dto.AddressLine;
+import com.infogain.gcp.poc.consumer.dto.MessageBody;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
+import com.infogain.gcp.poc.consumer.helper.TeletypeEventDTOUtil;
 import com.infogain.gcp.poc.consumer.util.TeleTypeUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -35,13 +38,11 @@ public class SubscriptionProcessingServiceTests {
     @Test
     public void testProcessMessages() throws JAXBException, InterruptedException, ExecutionException, IOException {
 
-        TeletypeEventDTO dto = new TeletypeEventDTO();
-        dto.setCarrierCode("123");
-        dto.setHostRecordLocator("AAA");
-        dto.setMessageCorelationId(1234L);
+
+        TeletypeEventDTO teletypeEventDTO = TeletypeEventDTOUtil.getDefaultTeletypeEventDTO();
 
         PubsubMessage pubsubMessage = PubsubMessage.newBuilder()
-                .setData(ByteString.copyFromUtf8(TeleTypeUtil.marshall(dto)))
+                .setData(ByteString.copyFromUtf8(TeleTypeUtil.marshall(teletypeEventDTO)))
                 .build();
         ReceivedMessage receivedMessage = ReceivedMessage.newBuilder().setMessage(pubsubMessage).build();
         List<ReceivedMessage> receivedMessageList = List.of(receivedMessage);
@@ -65,13 +66,10 @@ public class SubscriptionProcessingServiceTests {
     @Test
     public void testRetrieveTeletypeEventDTOList() throws JAXBException {
 
-        TeletypeEventDTO dto = new TeletypeEventDTO();
-        dto.setCarrierCode("123");
-        dto.setHostRecordLocator("AAA");
-        dto.setMessageCorelationId(1234L);
+        TeletypeEventDTO teletypeEventDTO = TeletypeEventDTOUtil.getDefaultTeletypeEventDTO();
 
         PubsubMessage pubsubMessage = PubsubMessage.newBuilder()
-                .setData(ByteString.copyFromUtf8(TeleTypeUtil.marshall(dto)))
+                .setData(ByteString.copyFromUtf8(TeleTypeUtil.marshall(teletypeEventDTO)))
                 .build();
         ReceivedMessage receivedMessage = ReceivedMessage.newBuilder().setMessage(pubsubMessage).build();
         List<TeletypeEventDTO> teletypeEventDTOList = ReflectionTestUtils.invokeMethod(subscriptionProcessingService, "retrieveTeletypeEventDTOList", List.of(receivedMessage));
