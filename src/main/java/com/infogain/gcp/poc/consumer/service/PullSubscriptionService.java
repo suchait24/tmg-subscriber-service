@@ -25,12 +25,12 @@ public class PullSubscriptionService {
 
     public void pullMessages() throws InterruptedException, ExecutionException, JAXBException, IOException {
 
+        Instant startTime = Instant.now();
         List<ReceivedMessage> receivedMessageList = pubSubSubscriber.getPullResponse();
 
         //acknowledge only when batch is successfully processed.
         if(!receivedMessageList.isEmpty()) {
 
-            Instant startTime = Instant.now();
             LocalDateTime batchReceivedTime = LocalDateTime.now();
             List<String> ackIds = subscriptionProcessingService.processMessages(receivedMessageList, batchReceivedTime,  startTime);
             pubSubSubscriber.acknowledgeMessageList(ackIds);
