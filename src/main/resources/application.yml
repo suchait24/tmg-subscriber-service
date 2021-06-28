@@ -39,7 +39,7 @@ info:
 
 app:
   subscription:
-    id: tty-topic-sub
+    id: tty-topic-demo-1-sub
     max:
       pull:
         count: 500
